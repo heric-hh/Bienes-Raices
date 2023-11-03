@@ -1,30 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienes Raíces - Nosotros</title>
-    <link rel="stylesheet" href="build/css/app.css">
-</head>
-<body>
-    <header class="header">
-        <div class="contenedor contenido-header">
-            <div class="barra">
-                <div class="mobile-menu">
-                    <img src="build/img/barras.svg" alt="Icono MenuResponsive">
-                </div>
-                <div class="derecha">
-                    <img src="build/img/dark-mode.svg" alt="Dark mode" class="dark-mode-boton">
-                    <nav class="navegacion">
-                        <a href="nosotros.html">Nosotros</a>
-                        <a href="anuncios.html">Anuncios</a>
-                        <a href="blog.html">Blog</a>
-                        <a href="contacto.html">Contacto</a>
-                    </nav>
-                </div>
-            </div> <!-- barra -->
-        </div>
-    </header>
+<?php 
+    //* Incluyendo el header en todos los archivos del sitio
+    require './includes/funciones.php';
+    incluirTemplate( "header" ); 
+?>
 
     <main class="contenedor seccion">
         <h1>Conoce sobre nosotros</h1>
@@ -101,18 +79,4 @@
     </section>
 
 
-    <footer class="footer seccion">
-        <div class="contenedor contenedor-footer">
-            <nav class="navegacion">
-                <a href="nosotros.html">Nosotros</a>
-                <a href="anuncios.html">Anuncios</a>
-                <a href="blog.html">Blog</a>
-                <a href="contacto.html">Contacto</a>
-            </nav>
-        </div>
-
-        <p class="copyright">Todos los derechos reservados 2023 &copy;</p>
-    </footer>
-    <script src="build/js/bundle.min.js"></script>
-</body>
-</html>
+    < <?php incluirTemplate( "footer" ) ?>
