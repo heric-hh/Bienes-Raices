@@ -23,13 +23,13 @@
     //* Ejecutar el codigo despues de que el usuario envia el formulario
 
     if( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-        echo "<pre>";
-        var_dump( $_POST );
-        echo "</pre>";
+        // echo "<pre>";
+        // var_dump( $_POST );
+        // echo "</pre>";
 
-        echo "<pre>";
-        var_dump( $_FILES );
-        echo "</pre>";
+        // echo "<pre>";
+        // var_dump( $_FILES );
+        // echo "</pre>";
 
         $titulo = mysqli_real_escape_string( $db, $_POST['titulo'] );
         $precio = mysqli_real_escape_string( $db, $_POST['precio'] );
@@ -128,7 +128,7 @@
         <?php endforeach; ?>
 
         <!-- La propiedad "enctype" permite subir archivos al formulario -->
-        <form action="crear.php" class="formulario" method="POST" enctype="multipart/form-data">
+        <form action="crear.html.php" class="formulario" method="POST" enctype="multipart/form-data">
             <fieldset>
                 <legend>Información General</legend>
                 <label for="titulo">Titulo</label>
