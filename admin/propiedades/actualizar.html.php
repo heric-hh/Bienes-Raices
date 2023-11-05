@@ -1,7 +1,22 @@
 <?php
+
+    //*Obtener el valor del query "id" que viene desde index.php para actualizar un registro.
+    $id = $_GET['id'];
+    //*El valor debe de filtrarse a modo de que admita solo tipo int
+    $id = filter_var( $id, FILTER_VALIDATE_INT );
+
+    //*Si el valor que viene del query no es entero, se redirige a la pagina de inicio
+    if( !$id )
+        header('Location: ../');
+
     //Base de datos
     require '../../includes/config/database.php';
     $db = conectarDB();
+
+    //* Consulta para obtener datos de la propiedad
+    $consulta = "SELECT * FROM propiedades WHERE id_propiedad = $id";
+    $resultado = mysqli_query( $db, $consulta );
+    $propiedad = mysqli_fetch_assoc( $resultado );
 
     //* Consultar para obtener los vendedores
     $consulta = "SELECT * FROM vendedores";
@@ -11,26 +26,20 @@
     
     $errores = [];
 
-    $titulo = '';
-    $precio = '';
-    $descripcion = '';
-    $habitaciones = '';
-    $wc = '';
-    $estacionamiento = '';
-    $vendedorId = '';
+    $titulo = $propiedad['titulo'];
+    $precio = $propiedad['precio'];
+    $descripcion = $propiedad['descripcion'];
+    $habitaciones = $propiedad['habitaciones'];
+    $wc = $propiedad['wc'];
+    $estacionamiento = $propiedad['estacionamiento'];
+    $vendedorId = $propiedad['id_vendedor'];
+    $imagenPropiedad = $propiedad['imagen'];
 
     
     //* Ejecutar el codigo despues de que el usuario envia el formulario
 
     if( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-        echo "<pre>";
-        var_dump( $_POST );
-        echo "</pre>";
-
-        echo "<pre>";
-        var_dump( $_FILES );
-        echo "</pre>";
-
+        
         $titulo = mysqli_real_escape_string( $db, $_POST['titulo'] );
         $precio = mysqli_real_escape_string( $db, $_POST['precio'] );
         $descripcion = mysqli_real_escape_string( $db, $_POST['descripcion'] );
@@ -42,9 +51,8 @@
         //Asignar files a una variable
         // La constante $_FILES permite la subida de archivos en PHP ya que por defecto, POST no permite el envio de archivos
         $imagen = $_FILES['imagen'];
-        var_dump( $imagen['name'] );
+        //var_dump( $imagen['name'] );
 
-        // exit;
 
         //* Serie de validaciones para que los campos no esten vacios. Los errores se almacenan en un array para mostrarlos posteriormente
 
@@ -69,47 +77,53 @@
         if( !$vendedorId )
             $errores[] = "El vendedor es obligatorio";
 
-        if( !$imagen['name'] || $imagen['error'] )
-            $errores[] = "La imagen es obligatoria";
-
         //* Validar la imagen por tamaño (100 Kb maximo)
         $medida = 100 * 1000;
 
         if( $imagen['size'] > $medida )
             $errores[] = "La imagen es muy grande";
 
-
-        
-        // echo "<pre>";
-        // var_dump( $errores );
-        // echo "</pre>";
-
         //* Revisar que el arreglo de errores este vacio. Posteriormente se ejecuta la insercion de valores a la base de datos.
         if( empty( $errores ) ) {
 
-            //*Subida de archivos creando una carpeta desde PHP
-            $carpetaImagenes = '../../imagenes/';
+             //*Subida de archivos creando una carpeta desde PHP
+             $carpetaImagenes = '../../imagenes/';
             
             //Para prevenir que se cree una carpeta en cada ejecucion, validamos si no existe la carpeta en el directorio
-            if( !is_dir( $carpetaImagenes ) )
+            if( !is_dir( $carpetaImagenes ) ) {
                 mkdir( $carpetaImagenes );
+            }
 
-            //*Generar un nombre unico para la imagen
-            $nombreImagen = md5( uniqid( rand() , true ) );
+            $nombreImagen = '';
             
-            //* Subir la imagen al servidor
-            move_uploaded_file( $imagen['tmp_name'] , $carpetaImagenes . $nombreImagen );
+            //* Si existe una nueva imagen debemos eliminar la imagen previa
+            if( $imagen['name'] ) {
+
+                //*Eliminar la imagen
+                unlink( $carpetaImagenes . $propiedad['imagen'] );
+
+                //*Generar un nombre unico para la imagen
+                $nombreImagen = md5( uniqid( rand() , true ) );
             
-             //* Insertar datos del formulario en la base de datos
-            $query = "INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, id_vendedor)
-                        VALUES ('$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento', '$vendedorId')";
+                //* Subir la imagen al servidor
+                move_uploaded_file( $imagen['tmp_name'] , $carpetaImagenes . $nombreImagen );
+            }
+            else {
+                $nombreImagen = $propiedad['imagen'];
+            }
+            
+             //* Actualizar datos del formulario en la base de datos
+            $query = "UPDATE propiedades SET titulo = '$titulo', precio = $precio, 
+            imagen = '$nombreImagen', descripcion = '$descripcion', habitaciones = $habitaciones, 
+            wc = $wc, estacionamiento = $estacionamiento, id_vendedor = $vendedorId WHERE id_propiedad = $id";
+
 
             //*Ejecutar la sentencia
             $resultado = mysqli_query( $db, $query );
 
             if( $resultado ) {
                 //* Redireccionar al usuario a la pagina de admin
-                header('Location: ../');
+                header('Location: ../?resultado=2');
             }
         }   
     }
@@ -118,7 +132,7 @@
 ?>
 
     <main class="contenedor">
-        <h1>Crear</h1>
+        <h1>Actualizar Propiedad</h1>
         <a href="../" class="boton boton-verde"> Volver </a>
 
         <?php foreach( $errores as $error ): ?>
@@ -128,7 +142,7 @@
         <?php endforeach; ?>
 
         <!-- La propiedad "enctype" permite subir archivos al formulario -->
-        <form action="crear.php" class="formulario" method="POST" enctype="multipart/form-data">
+        <form class="formulario" method="POST" enctype="multipart/form-data">
             <fieldset>
                 <legend>Información General</legend>
                 <label for="titulo">Titulo</label>
@@ -139,6 +153,8 @@
 
                 <label for="imagen">Imagen</label>
                 <input type="file" id="imagen" accept="image/jpeg, image/png" name="imagen">
+
+                <img src="imagenes/<?php echo $imagenPropiedad ?>">
 
                 <label for="descripcion">Descripcion</label>
                 <textarea name="descripcion" id="descripcion" cols="30" rows="10"> <?php echo $descripcion ?> </textarea>
@@ -169,7 +185,7 @@
                 </select>
             </fieldset>
 
-            <input type="submit" value="Crear Propiedad" class="boton boton-verde">
+            <input type="submit" value="Actualizar Propiedad" class="boton boton-verde">
         </form>
 
     </main>
