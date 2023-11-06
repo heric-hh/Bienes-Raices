@@ -57,7 +57,7 @@
         <?php endif; ?>
 
         <?php
-        if( intval( $resultado ) === 2 ) : ?> <!-- int val convierte el valor string a int -->
+        if( intval( $resultado ) === 3 ) : ?> <!-- int val convierte el valor string a int -->
             <p class="alerta exito">Anuncio Eliminado Correctamente</p>
         <?php endif; ?>
         <a href="propiedades/crear.html.php" class="boton boton-verde"> Nueva Propiedad </a>
