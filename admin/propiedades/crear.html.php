@@ -42,7 +42,7 @@
         //Asignar files a una variable
         // La constante $_FILES permite la subida de archivos en PHP ya que por defecto, POST no permite el envio de archivos
         $imagen = $_FILES['imagen'];
-        var_dump( $imagen['name'] );
+        // var_dump( $imagen['name'] );
 
         // exit;
 
