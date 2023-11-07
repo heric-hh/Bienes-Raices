@@ -1,4 +1,9 @@
 <?php
+    require '../../includes/funciones.php';
+
+    $auth = estaAutenticado();
+    if ( !$auth )
+        header('Location: /bienesraices/index.html.php');
 
     //*Obtener el valor del query "id" que viene desde index.php para actualizar un registro.
     $id = $_GET['id'];
@@ -127,7 +132,6 @@
             }
         }   
     }
-    require '../../includes/funciones.php';
     incluirTemplate( "header" ); 
 ?>
 
