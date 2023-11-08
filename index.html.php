@@ -1,5 +1,5 @@
 <?php
-    require './includes/funciones.php';
+    require './includes/app.php';
 
   
     //* Incluyendo el header en todos los archivos del sitio

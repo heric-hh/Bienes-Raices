@@ -1,0 +1,16 @@
+{
+    "name": "hheri/bienesraices",
+    "description": "Creando un proyecto con POO",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Eric Hernandez"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "./clases"
+        }
+    }
+}

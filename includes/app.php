@@ -1,4 +1,12 @@
 <?php
 
-CONST TEMPLATES_URL = __DIR__ . '/templates/';
-CONST FUNCIONES_URL = __DIR__ . 'funciones.php';
+require 'funciones.php';
+require 'config/database.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+//* Conectandose a la base de datos 
+$db = conectarDB();
+
+use App\Propiedad;
+
+Propiedad::setDb( $db );

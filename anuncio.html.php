@@ -7,11 +7,10 @@
         header('Location: anuncios.html.php' );
     
     //* Incluyendo el header en todos los archivos del sitio
-    require './includes/funciones.php';
+    require './includes/app.php';
     incluirTemplate( "header" ); 
 
     //*Incluyendo la base de datos
-    require 'includes/config/database.php';
     $db = conectarDB();
 
     //*Consultar los datos

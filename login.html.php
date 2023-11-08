@@ -1,6 +1,6 @@
 <?php
     //*Conexion a la base de datos
-    require 'includes/config/database.php';
+    require 'includes/app.php';
     $db = conectarDB();
 
     //* Errores
@@ -40,7 +40,9 @@
                 $_SESSION['usuario'] = $usuario['email'];
                 $_SESSION['login'] = true;
 
-                header('Location: admin');
+                // debugear($_SESSION);
+
+                header('Location: admin/index.php');
             }
             else {
                 $errores[] = "El password es incorrecto";
@@ -52,7 +54,6 @@
     }
 
     //* Incluyendo el header en todos los archivos del sitio
-    require './includes/funciones.php';
     incluirTemplate( "header" ); 
 ?>
 

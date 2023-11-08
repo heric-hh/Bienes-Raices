@@ -1,11 +1,11 @@
 <?php
-    require '../../includes/funciones.php';
-    $auth = estaAutenticado();
-    if ( !$auth )
-        header('Location: /bienesraices/index.html.php');
+    require '../../includes/app.php';
+    use App\Propiedad;
+
+    estaAutenticado();
+    
 
     //Base de datos
-    require '../../includes/config/database.php';
     $db = conectarDB();
 
     //* Consultar para obtener los vendedores
@@ -28,13 +28,9 @@
     //* Ejecutar el codigo despues de que el usuario envia el formulario
 
     if( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-        // echo "<pre>";
-        // var_dump( $_POST );
-        // echo "</pre>";
-
-        // echo "<pre>";
-        // var_dump( $_FILES );
-        // echo "</pre>";
+        $propiedad = new Propiedad( $_POST );
+        $propiedad->guardar();
+        debugear( $propiedad );
 
         $titulo = mysqli_real_escape_string( $db, $_POST['titulo'] );
         $precio = mysqli_real_escape_string( $db, $_POST['precio'] );
@@ -47,9 +43,6 @@
         //Asignar files a una variable
         // La constante $_FILES permite la subida de archivos en PHP ya que por defecto, POST no permite el envio de archivos
         $imagen = $_FILES['imagen'];
-        // var_dump( $imagen['name'] );
-
-        // exit;
 
         //* Serie de validaciones para que los campos no esten vacios. Los errores se almacenan en un array para mostrarlos posteriormente
 
@@ -84,11 +77,6 @@
             $errores[] = "La imagen es muy grande";
 
 
-        
-        // echo "<pre>";
-        // var_dump( $errores );
-        // echo "</pre>";
-
         //* Revisar que el arreglo de errores este vacio. Posteriormente se ejecuta la insercion de valores a la base de datos.
         if( empty( $errores ) ) {
 
@@ -105,10 +93,7 @@
             //* Subir la imagen al servidor
             move_uploaded_file( $imagen['tmp_name'] , $carpetaImagenes . $nombreImagen );
             
-             //* Insertar datos del formulario en la base de datos
-            $query = "INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, id_vendedor)
-                        VALUES ('$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento', '$vendedorId')";
-
+            
             //*Ejecutar la sentencia
             $resultado = mysqli_query( $db, $query );
 
