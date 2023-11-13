@@ -5,6 +5,21 @@ namespace App;
 class Propiedad {
 
     protected static $db;
+    protected static $columnasDb = [
+        'id_propiedad',
+        'titulo',
+        'precio',
+        'imagen',
+        'descripcion',
+        'habitaciones',
+        'wc',
+        'estacionamiento',
+        'creado',
+        'id_vendedor'
+    ];
+
+    //* Errores
+    protected static $errores = [];
 
     public $id_propiedad;
     public $titulo;
@@ -22,7 +37,7 @@ class Propiedad {
         $this->id_propiedad = $args['id_propiedad'] ?? '';
         $this->titulo = $args['titulo'] ?? '';
         $this->precio = $args['precio'] ?? '';
-        $this->imagen = $args['imagen'] ?? 'imagen.jpg';
+        $this->imagen = $args['imagen'] ?? '';
         $this->descripcion = $args['descripcion'] ?? '';
         $this->habitaciones = $args['habitaciones'] ?? '';
         $this->wc = $args['wc'] ?? '';
@@ -31,18 +46,105 @@ class Propiedad {
         $this->id_vendedor = $args['vendedor'] ?? '';
     }
 
-    public function guardar() {
-        $query = "INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, id_vendedor)
-        VALUES ('$this->titulo', $this->precio, '$this->imagen', '$this->descripcion', 
-        $this->habitaciones, $this->wc, $this->estacionamiento, '$this->id_vendedor')";
-
-        $resultado = self::$db->query( $query );
-        debugear( $resultado );
-    }
-
     //* Definiendo la conexion a la base de datos
     public static function setDb( $database ) {
         self::$db = $database; 
     }
+
+    /* *
+        La siguiente funcion crea un nuevo arreglo "atributos" para almacenar los valores que tiene almacenado en memoria la clase
+        Propiedad. Especificamente, los valores de sus atributos. 
+        Recorre el array "columnasDb" asignando cada value de este como key del array "atributos". 
+            #    "array atributos" --->$atributos [ 'titulo' ] <--- "cada value del arreglo $columnasDb que es igual a $columna"
+        Entonces cada key de $atributos almacenara el valor de cada atributo de la clase.
+            #    $this->$columna
+            #    "Referencia a la clase"-> "Atributo de la clase"
+        Esto es posible porque "$columna" almacena el string con el nombre identico de cada atributo de la clase. Ejemplo de cada iteracion:
+                $this->'titulo, precio, wc, etc.' <--- Nombre del atributo de la clase
+    * */
+    public function atributos() {
+        $atributos = [];
+        foreach( self::$columnasDb as $columna ) {
+            if( $columna === 'id_propiedad' ) continue;
+            $atributos[ $columna ] = $this->$columna; 
+        }
+        return $atributos;
+    }
+
+    public function sanitizarAtributos() {
+        $atributos = $this->atributos();
+        $sanitizado = [];
+
+        foreach( $atributos as $key => $value ) {
+            $sanitizado[ $key ] = self::$db->escape_string( $value ); //Asignando el valor sanitizado al array "sanitizado"
+        }
+
+        return $sanitizado;
+    }
+
+    public function guardar() {
+
+        //* Sanitizar los datos
+        $atributos = $this->sanitizarAtributos();
+
+        $nombresColumnas = 
+
+        //* Insertar en la base de datos
+        $query = "INSERT INTO propiedades ( ";
+        $query .= join( ', ' , array_keys( $atributos ) ); // Recorriendo cada key del array atributos y crear un string con todos los nombres de las columnas del query
+        $query .= " ) VALUES ( ' ";
+        $query .= join( "', '",  array_values( $atributos ) ); // Recorriendo cada value del array atributos y crear un string con todos los values del array
+        $query .= " ') ";
+
+        $resultado = self::$db->query( $query );
+        return $resultado;
+    }
+
+    //* Subida de archivos
+    public function setImagen( $imagen ) {
+        // Asignar al atributo imagen el nombre de la imagen
+        if( $imagen ) {
+            $this->imagen = $imagen;
+        }
+    }
+
+    //! Validacion
+    public static function getErrores() {
+        return self::$errores;
+    }
+
+    public function validar() {
+        if( !$this->titulo ) 
+            self::$errores[] = "Debes añadir un titulo";
+
+        if( !$this->precio ) 
+            self::$errores[] = "Debes añadir el precio";
+
+        if( strlen( !$this->descripcion ) > 50 ) 
+            self::$errores[] = "La descripcion es obligatoria y debe tener al menos 50 caracteres";
+
+        if( !$this->habitaciones ) 
+            self::$errores[] = "Debes añadir el numero de habitaciones";
+
+        if( !$this->wc ) 
+            self::$errores[] = "Debes añadir el numero de baños";
+
+        if( !$this->estacionamiento ) 
+            self::$errores[] = "Debes añadir numero de lugares de estacionamiento";
+
+        if( !$this->id_vendedor ) 
+            self::$errores[] = "Elige un vendedor";
+
+        if( !$this->imagen ) {
+            self::$errores[] = "La imagen es obligatoria";
+        }
+
+        return self::$errores;
+
+    }
+
+    
+
+
 
 }
