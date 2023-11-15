@@ -49,12 +49,7 @@
 
             $image->save( CARPETA_IMAGENES . $nombreImagen );
             
-            $resultado = $propiedad->guardar();
-            
-            if( $resultado ) {
-                //* Redireccionar al usuario a la pagina de admin
-                header('Location: ../?resultado=1');
-            }
+            $propiedad->guardar();
         }   
     }
     incluirTemplate( "header" ); 

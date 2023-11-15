@@ -22,19 +22,17 @@
         $idPropiedad = filter_var( $idPropiedad, FILTER_VALIDATE_INT );
         
         if( $idPropiedad ) {
+
+            $propiedad = Propiedad::find( $idPropiedad );
+            
+            $propiedad->eliminar();
+
             //* Para eliminar el archivo de imagen, necesitamos traer el nombre del archivo de la base de datos y hacerlo coincidir con
             //* alguno de los nombres que tenemos en la carpeta "imagenes"
             $query = "SELECT imagen FROM propiedades WHERE id_propiedad = '$idPropiedad'";
             $resultado = mysqli_query( $db, $query );
             $propiedad = mysqli_fetch_assoc( $resultado );
             unlink( '../imagenes/' . $propiedad['imagen'] );
-
-            //* Eliminar la propiedad
-            $query = "DELETE FROM propiedades WHERE id_propiedad = '$idPropiedad'";
-            $resultado = mysqli_query( $db, $query );
-
-            if( $resultado )
-                header('Location: ' . $_SERVER['PHP_SELF'] ); // $_SERVER['PHP_SELF'] -> para obtener la url actual
         }
     }
     

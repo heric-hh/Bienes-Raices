@@ -34,7 +34,7 @@ class Propiedad {
 
     public function __construct( $args = [] )
     {   
-        $this->id_propiedad = $args['id_propiedad'] ?? '';
+        $this->id_propiedad = $args['id_propiedad'] ?? null;
         $this->titulo = $args['titulo'] ?? '';
         $this->precio = $args['precio'] ?? '';
         $this->imagen = $args['imagen'] ?? '';
@@ -83,7 +83,7 @@ class Propiedad {
     }
 
     public function guardar() {
-        if( isset( $this->id_propiedad ) ) {
+        if( !is_null( $this->id_propiedad ) ) {
             //Actualizando el registro
             $this->actualizar();
 
@@ -95,7 +95,6 @@ class Propiedad {
     }
 
     public function crear() {
-
         //* Sanitizar los datos
         $atributos = $this->sanitizarAtributos();
 
@@ -109,7 +108,11 @@ class Propiedad {
         $query .= " ') ";
 
         $resultado = self::$db->query( $query );
-        return $resultado;
+        
+        if( $resultado ) {
+            //* Redireccionar al usuario a la pagina de admin
+            header('Location: ../?resultado=1');
+        }
     }
 
     public function actualizar() {
@@ -135,22 +138,36 @@ class Propiedad {
         }
     }
 
-   
+    public function eliminar() {
+        //* Eliminar la propiedad
+        $query = "DELETE FROM propiedades WHERE id_propiedad = " . self::$db->escape_string( $this->id_propiedad ) . " LIMIT 1";
+        $resultado = self::$db->query( $query );
+        
+        if( $resultado ) {
+            $this->borrarImagen();
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?resultado=3' ); // $_SERVER['PHP_SELF'] -> para obtener la url actual        
+        }
+    }
 
     //* Subida de archivos
     public function setImagen( $imagen ) {
 
         // Elimina la imagen previa
-        if( isset( $this->id_propiedad ) ) {
-            $existeArchivo = file_exists( CARPETA_IMAGENES . $this->imagen );
-            if( $existeArchivo ) {
-                unlink( CARPETA_IMAGENES . $this->imagen );
-            }
+        if( !is_null( $this->id_propiedad ) ) {
+            $this->borrarImagen();
         }
-
         // Asignar al atributo imagen el nombre de la imagen
         if( $imagen ) {
             $this->imagen = $imagen;
+        }
+    }
+
+    //! Eliminar imagen
+    public function borrarImagen() {
+        // Elimina la imagen previa
+        $existeArchivo = file_exists( CARPETA_IMAGENES . $this->imagen );
+        if( $existeArchivo ) {
+            unlink( CARPETA_IMAGENES . $this->imagen );
         }
     }
 
