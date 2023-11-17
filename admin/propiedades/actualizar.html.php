@@ -1,6 +1,7 @@
 <?php
 
 use App\Propiedad;
+use App\Vendedor;
 use Intervention\Image\ImageManagerStatic as Image;
 
 
@@ -22,8 +23,7 @@ use Intervention\Image\ImageManagerStatic as Image;
 
 
     //* Consultar para obtener los vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query( $db, $consulta );
+    $vendedores = Vendedor::all();
 
     //* Arreglo con mensajes de errores
     
@@ -52,9 +52,10 @@ use Intervention\Image\ImageManagerStatic as Image;
 
         //* Revisar que el arreglo de errores este vacio. Posteriormente se ejecuta la insercion de valores a la base de datos.
         if( empty( $errores ) ) {
-            //Almacenar imagen
-            $image->save( CARPETA_IMAGENES . $nombreImagen );
-
+            if( $_FILES['propiedad']['tmp_name']['imagen'] ) {
+                //Almacenar imagen
+                $image->save( CARPETA_IMAGENES . $nombreImagen );
+            }
             $propiedad->guardar();
         }   
     }

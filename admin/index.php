@@ -4,9 +4,11 @@
     estaAutenticado();
 
     use App\Propiedad;
+    use App\Vendedor;
 
     //Implementar un metodo para listar todas las propiedades usando Active Record, Propiedades siendo un array de objetos
     $propiedades = Propiedad::all();
+    $vendedores = Vendedor::all();
 
     //* La variable mensaje almacenará el parametro del query que se está enviando en la redirección al guardar una propiedad
     $resultado = $_GET['resultado'] ?? null; //Si no existe el query 'resultado' en la url, se asigna "null"
@@ -15,24 +17,26 @@
     /* Este bloque de codigo se ejecutara despues de que haya una peticion POST, en este caso, al dar clic al boton "Eliminar"
      de la lista de propiedades */
     if( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-        
-        $idPropiedad = $_POST['idPropiedad'];
 
-        //! Validando el idPropiedad
-        $idPropiedad = filter_var( $idPropiedad, FILTER_VALIDATE_INT );
-        
-        if( $idPropiedad ) {
+        $id = $_POST['id'];
+        $id = filter_var( $id, FILTER_VALIDATE_INT );
 
-            $propiedad = Propiedad::find( $idPropiedad );
-            
-            $propiedad->eliminar();
+        if( $id ) {
 
-            //* Para eliminar el archivo de imagen, necesitamos traer el nombre del archivo de la base de datos y hacerlo coincidir con
-            //* alguno de los nombres que tenemos en la carpeta "imagenes"
-            $query = "SELECT imagen FROM propiedades WHERE id_propiedad = '$idPropiedad'";
-            $resultado = mysqli_query( $db, $query );
-            $propiedad = mysqli_fetch_assoc( $resultado );
-            unlink( '../imagenes/' . $propiedad['imagen'] );
+            $tipo = $_POST['tipo'];
+
+            if( validarTipoContenido( $tipo ) ) {
+                
+                //Compara lo que vamos a eliminar
+                if( $tipo === 'vendedor' ) {
+                    $vendedor = Vendedor::findVendedor( $id );
+                    $vendedor->eliminarVendedor();
+                    
+                } else if ( $tipo === 'propiedad' ) {
+                    $propiedad = Propiedad::find( $id );
+                    $propiedad->eliminar();
+                }
+            } 
         }
     }
     
@@ -43,20 +47,17 @@
     <main class="contenedor">
         <h1>Administrador de Bienes Raíces</h1>
         <?php 
-        if( intval( $resultado ) === 1 ) : ?> <!-- int val convierte el valor string a int -->
-            <p class="alerta exito">Anuncio Creado Correctamente</p>
-        <?php endif; ?>
+            $mensaje = mostrarMensajes( intval( $resultado ) );
 
-        <?php
-        if( intval( $resultado ) === 2 ) : ?> <!-- int val convierte el valor string a int -->
-            <p class="alerta exito">Anuncio Actualizado Correctamente</p>
-        <?php endif; ?>
-
-        <?php
-        if( intval( $resultado ) === 3 ) : ?> <!-- int val convierte el valor string a int -->
-            <p class="alerta exito">Anuncio Eliminado Correctamente</p>
-        <?php endif; ?>
+            if ( $mensaje ) : ?>
+                <p class="alerta exito"> <?php echo s( $mensaje ) ?> </p>
+            <?php endif ?>
+        ?>
         <a href="propiedades/crear.html.php" class="boton boton-verde"> Nueva Propiedad </a>
+        <a href="vendedores/crear.html.php" class="boton boton-amarillo"> Nuevo Vendedor </a>
+
+
+        <h2>Propiedades</h2>
         
         <table class="propiedades">
             <thead>
@@ -79,7 +80,8 @@
                     <td> $ <?php echo $propiedad->precio ?> </td>
                     <td>
                         <form method="POST" class="w-100">
-                            <input type="hidden" name="idPropiedad" value="<?php echo $propiedad->id_propiedad; ?>">
+                            <input type="hidden" name="id" value="<?php echo $propiedad->id_propiedad; ?>">
+                            <input type="hidden" name="tipo" value = "propiedad">
                             <input type="submit" class="boton-rojo-block" value="Eliminar">
                         </form>
                         <a 
@@ -92,10 +94,42 @@
                 <?php endforeach ?>
             </tbody>
         </table>
+
+        <h2>Vendedores</h2>
+
+        <table class="propiedades">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Telefono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <!-- Mostrar los resultados -->
+            <tbody>
+                <?php foreach( $vendedores as $vendedor ) :  ?>
+                <tr>
+                    <td> <?php echo $vendedor->id_vendedor ?> </td>
+                    <td> <?php echo $vendedor->nombre . " " . $vendedor->apellido ?> </td>
+                    <td> <?php echo $vendedor->telefono ?> </td>
+                    <td>
+                        <form method="POST" class="w-100">
+                            <input type="hidden" name="id" value="<?php echo $vendedor->id_vendedor; ?>">
+                            <input type="hidden" name="tipo" value = "vendedor">
+                            <input type="submit" class="boton-rojo-block" value="Eliminar">
+                        </form>
+                        <a 
+                            href="vendedores/actualizar.html.php?id=<?php echo $vendedor->id_vendedor; ?>"
+                            class="boton-amarillo-block" >                            
+                            Actualizar
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach ?>
+            </tbody>
+        </table>
     </main>
 
-    <?php 
-        //*Cerrar la conexion
-        mysqli_close( $db );
-        incluirTemplate( "footer" ) 
-    ?>
+    <?php incluirTemplate( "footer" ) ?>

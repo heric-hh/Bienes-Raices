@@ -1,19 +1,15 @@
 <?php
     require '../../includes/app.php';
     use App\Propiedad;
+    use App\Vendedor;
     use Intervention\Image\ImageManagerStatic as Image;
 
     estaAutenticado();
-    
-
-    //Base de datos
-    $db = conectarDB();
 
     $propiedad = new Propiedad;
 
-    //* Consultar para obtener los vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query( $db, $consulta );
+    //* Consulta para obtener todos los vendedores
+    $vendedores = Vendedor::all();
 
     //* Arreglo con mensajes de errores
     
@@ -26,7 +22,6 @@
         //* Crea una nueva instancia de Propiedad
         $propiedad = new Propiedad( $_POST['propiedad'] );
         
-
         //*Generar un nombre unico para la imagen
         $nombreImagen = md5( uniqid( rand() , true ) ) . ".jpg";
 
@@ -55,7 +50,7 @@
     incluirTemplate( "header" ); 
 ?>
 
-    <main class="contenedor">
+    <main class="contenedor seccion">
         <h1>Crear</h1>
         <a href="../" class="boton boton-verde"> Volver </a>
 
